@@ -31,7 +31,7 @@ def get_device_path(device_name):
     """
     if device_name is None:
         return None
-    
+
     b = blivet.Blivet()
     b.reset()
     device = b.get_device_by_name(device_name)
