@@ -19,9 +19,6 @@
 import blivet.util
 
 from pyanaconda.anaconda_loggers import get_module_logger
-from pyanaconda.modules.common.constants.objects import DEVICE_TREE
-from pyanaconda.modules.common.constants.services import STORAGE
-from pyanaconda.modules.common.structures.storage import DeviceData
 
 log = get_module_logger(__name__)
 
@@ -34,10 +31,12 @@ def get_device_path(device_name):
     """
     if device_name is None:
         return None
-
-    device_tree = STORAGE.get_proxy(DEVICE_TREE)
-    device_data = DeviceData.from_structure(device_tree.GetDeviceData(device_name))
-    return device_data.path
+    
+    b = blivet.Blivet()
+    b.reset()
+    device = b.get_device_by_name(device_name)
+    if device:
+        return device.path
 
 
 def mount_device(device_name, mount_point):
@@ -46,8 +45,7 @@ def mount_device(device_name, mount_point):
     :param device_name: a device name
     :param str mount_point: a path to the mount point
     """
-    device_tree = STORAGE.get_proxy(DEVICE_TREE)
-    device_tree.MountDevice(device_name, mount_point, "ro")
+    mount(get_device_path(device_name), mount_point, "auto", "ro")
 
 
 def unmount_device(device_name, mount_point):
@@ -67,8 +65,7 @@ def unmount_device(device_name, mount_point):
 
         mount_point = mount_paths[-1]
 
-    device_tree = STORAGE.get_proxy(DEVICE_TREE)
-    device_tree.UnmountDevice(device_name, mount_point)
+    unmount(mount_point)
 
 
 def get_mount_paths(device_path):
